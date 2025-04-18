@@ -1,0 +1,5 @@
+RealTime value: 256
+High value: 128
+Current priority: High
+Attempting to set to RealTime...
+New priority: RealTime

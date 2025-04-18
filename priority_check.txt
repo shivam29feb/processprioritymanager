@@ -1,0 +1,10 @@
+RealTime = 256
+High = 128
+Current priority: High
+Attempting to set to RealTime...
+New priority: RealTime
+Checking ProcessPriorityManager.ps1...
+Found 3 instances of setting priority:
+PriorityClass = [System.Diagnostics.ProcessPriorityClass]::RealTime
+PriorityClass = [System.Diagnostics.ProcessPriorityClass]::RealTime
+PriorityClass = [System.Diagnostics.ProcessPriorityClass]::RealTime

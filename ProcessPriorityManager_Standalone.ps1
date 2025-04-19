@@ -1,5 +1,6 @@
 # ProcessPriorityManager - Standalone Script
 # This script monitors for PowerShell and OpenConsole processes and sets their priority to Realtime
+# It can also stop Windows Update related services
 
 # Check if running as administrator
 function Test-Administrator {
@@ -15,6 +16,74 @@ if (-not (Test-Administrator)) {
     # Restart the script with elevated privileges
     Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -NoProfile -File \"$PSCommandPath\"" -Verb RunAs
     exit
+}
+
+# Function to stop Windows Update services
+function Stop-WindowsUpdateServices {
+    # List of Windows Update related services to stop
+    $updateServices = @(
+        "wuauserv",           # Windows Update
+        "UsoSvc",             # Update Orchestrator Service
+        "DoSvc",              # Delivery Optimization
+        "WaaSMedicSvc"        # Windows Update Medic Service
+    )
+
+    Write-Host "=== Stopping Windows Update Services ===" -ForegroundColor Cyan
+
+    foreach ($service in $updateServices) {
+        try {
+            $svc = Get-Service -Name $service -ErrorAction Stop
+
+            # Get current status
+            $currentStatus = $svc.Status
+            $currentStartType = (Get-Service -Name $service).StartType
+
+            Write-Host "Service: $($svc.DisplayName) ($service)" -ForegroundColor Cyan
+            Write-Host "  Current Status: $currentStatus" -ForegroundColor Gray
+            Write-Host "  Current Start Type: $currentStartType" -ForegroundColor Gray
+
+            # Stop the service if it's running
+            if ($currentStatus -eq "Running") {
+                Write-Host "  Stopping service..." -ForegroundColor Yellow
+                Stop-Service -Name $service -Force -ErrorAction Stop
+                Write-Host "  Service stopped successfully." -ForegroundColor Green
+            }
+            else {
+                Write-Host "  Service is already stopped." -ForegroundColor Green
+            }
+
+            # Set service to disabled
+            if ($currentStartType -ne "Disabled") {
+                Write-Host "  Setting service to disabled..." -ForegroundColor Yellow
+                Set-Service -Name $service -StartupType Disabled -ErrorAction Stop
+                Write-Host "  Service set to disabled." -ForegroundColor Green
+            }
+            else {
+                Write-Host "  Service is already disabled." -ForegroundColor Green
+            }
+        }
+        catch {
+            Write-Host "  Error processing service $service: $_" -ForegroundColor Red
+        }
+
+        Write-Host ""
+    }
+
+    Write-Host "Windows Update services processing completed." -ForegroundColor Cyan
+}
+
+# Ask if user wants to stop Windows Update services
+Write-Host "Would you like to stop Windows Update services?" -ForegroundColor Cyan
+Write-Host "This will stop and disable the following services:"
+Write-Host "- Windows Update"
+Write-Host "- Update Orchestrator"
+Write-Host "- Delivery Optimization"
+Write-Host "- Windows Update Medic Service"
+
+$stopUpdateServices = Read-Host "Stop Windows Update services? (Y/N)"
+
+if ($stopUpdateServices -eq "Y" -or $stopUpdateServices -eq "y") {
+    Stop-WindowsUpdateServices
 }
 
 # Keep track of processes we've already set

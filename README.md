@@ -8,6 +8,11 @@ This tool automatically sets the priority of PowerShell and OpenConsole processe
 
 - Monitors for PowerShell, PowerShell ISE, PowerShell Core, OpenConsole, and Windows Terminal processes
 - Sets process priority to "Realtime" for better performance
+- Can stop and disable Windows Update related services:
+  - Windows Update
+  - Update Orchestrator
+  - Delivery Optimization
+  - Windows Update Medic Service
 - Multiple deployment options:
   - Run in a PowerShell window
   - Run as a background job
